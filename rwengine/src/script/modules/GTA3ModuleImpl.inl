@@ -11315,12 +11315,35 @@ bool opcode_03b5(const ScriptArguments& args) {
 	@arg model1 Model ID
 */
 void opcode_03b6(const ScriptArguments& args, ScriptVec3 coord, const ScriptFloat radius, const ScriptModel model0, const ScriptModel model1) {
-	RW_UNIMPLEMENTED_OPCODE(0x03b6);
-	RW_UNUSED(coord);
-	RW_UNUSED(radius);
-	RW_UNUSED(model0);
-	RW_UNUSED(model1);
-	RW_UNUSED(args);
+	if( std::abs(model0) > 178 || std::abs(model1) > 178 ) {
+		/// @todo implement this path, move model code into ScriptArguments
+		return;
+	}
+
+	int name0 = std::abs(model0);
+	int name1 = std::abs(model1);
+
+	auto oldmodel = args.getVM()->getFile()->getModels()[name0];
+	auto newmodel = args.getVM()->getFile()->getModels()[name1];
+	std::transform(newmodel.begin(), newmodel.end(), newmodel.begin(), ::tolower);
+	std::transform(oldmodel.begin(), oldmodel.end(), oldmodel.begin(), ::tolower);
+
+	auto newobjectid = args.getWorld()->data->findModelObject(newmodel);
+	auto nobj = args.getWorld()->data->findObjectType<ObjectData>(newobjectid);
+
+	/// @todo Objects need to adopt the new object ID, not just the model.
+	for(auto p : args.getWorld()->instancePool.objects) {
+		auto o = p.second;
+		if( !o->model ) continue;
+		if( o->model->name != oldmodel ) continue;
+		float d = glm::distance(coord, o->getPosition());
+		if( d < radius ) {
+			args.getWorld()->data->loadDFF(newmodel + ".dff", false);
+			InstanceObject* inst = static_cast<InstanceObject*>(o);
+			inst->changeModel(nobj);
+			inst->model = args.getWorld()->data->models[newmodel];
+		}
+	}
 }
 
 /**
