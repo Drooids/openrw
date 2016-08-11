@@ -194,15 +194,16 @@ struct BlipData
 	enum DisplayMode
 	{
 		Hide = 0,
-		RadarOnly = 1,
-		Show = 2
+		MarkerOnly = 1,
+		RadarOnly = 2,
+		ShowBoth = 3
 	};
 	
 	/* Should the blip be displayed? */
 	DisplayMode display;
 	
 	BlipData()
-	: id(-1), type(Location), target(0), display(Show)
+	: id(-1), type(Location), target(0), display(ShowBoth)
 	{ }
 
 	int getScriptObjectID() const
