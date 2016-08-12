@@ -6418,6 +6418,10 @@ void opcode_0213(const ScriptArguments& args, const ScriptModel model, const Scr
 */
 bool opcode_0214(const ScriptArguments& args, const ScriptPickup pickup) {
 	RW_UNUSED(args);
+	RW_CHECK(pickup != nullptr, "Pickup is null");
+	if (! pickup) {
+		return false;
+	}
 	return pickup->isCollected();
 }
 
